@@ -360,10 +360,13 @@ refresh() {
     perform_refresh() {
         # Check if there are any changes in the working tree
         if [ "$(git status --porcelain)" ]; then
-            # Commit changes before pulling
-            git add -A >/dev/null 2>&1
-            git commit -m "${current_ticket:-temp-WIP-$(date +%s)}" >/dev/null 2>&1
-            git push --set-upstream origin "$current_ticket" >/dev/null 2>&1
+            # Stash any changes before pulling
+            git stash >/dev/null 2>&1
+
+            # # Commit changes before pulling
+            # git add -A >/dev/null 2>&1
+            # git commit -m "${current_ticket:-temp-WIP-$(date +%s)}" >/dev/null 2>&1
+            # git push --set-upstream origin "$current_ticket" >/dev/null 2>&1
         fi
 
         # Pull updates from origin of the current ticket
@@ -384,6 +387,7 @@ refresh() {
             git add -A >/dev/null 2>&1
             git commit -m "$current_ticket update with other tickets" >/dev/null 2>&1
         fi
+        git stash pop >/dev/null 2>&1
     }
 
     if [ -z "$1" ]; then
