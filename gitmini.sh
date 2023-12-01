@@ -358,16 +358,17 @@ refresh() {
 
     # Function to perform a single refresh
     perform_refresh() {
+        git stash push -m "temporarystash" -u >/dev/null 2>&1
         # Check if there are any changes in the working tree
-        if [ "$(git status --porcelain)" ]; then
-            # Stash any changes before pulling
-            git stash >/dev/null 2>&1
+        # if [ "$(git status --porcelain)" ]; then
+        # Stash any changes before pulling
+        # git stash >/dev/null 2>&1
 
-            # # Commit changes before pulling
-            # git add -A >/dev/null 2>&1
-            # git commit -m "${current_ticket:-temp-WIP-$(date +%s)}" >/dev/null 2>&1
-            # git push --set-upstream origin "$current_ticket" >/dev/null 2>&1
-        fi
+        # # Commit changes before pulling
+        # git add -A >/dev/null 2>&1
+        # git commit -m "${current_ticket:-temp-WIP-$(date +%s)}" >/dev/null 2>&1
+        # git push --set-upstream origin "$current_ticket" >/dev/null 2>&1
+        # fi
 
         # Pull updates from origin of the current ticket
         git pull >/dev/null 2>&1
@@ -387,7 +388,11 @@ refresh() {
             git add -A >/dev/null 2>&1
             git commit -m "$current_ticket update with other tickets" >/dev/null 2>&1
         fi
-        git stash pop >/dev/null 2>&1
+        # Apply the stashed changes named temporarystash
+        temporary_stash_ref=$(git stash list | grep -w "temporarystash" | cut -d "{" -f2 | cut -d "}" -f1)
+        git stash apply stash@\{"$temporary_stash_ref"\} >/dev/null 2>&1
+        git stash drop stash@\{"$temporary_stash_ref"\} >/dev/null 2>&1
+
     }
 
     if [ -z "$1" ]; then
